@@ -1,0 +1,27 @@
+Never probe the charger (0x6B) or the IMU footprint (0x6A) in the I2C scan
+
+Stock ScanI2CTwoWire::scanPort() sends an address-only write to every address from 0x08 to
+0x77 and, at 0x6B, register-pointer writes for registers 0x0A, 0x14 and 0x0F before it decides
+whether the device is a BQ24295, BQ25896, LSM6DS3 or QMI8658. On the NDI 1 W board 0x6B is the
+BQ25856-Q1 charger and 0x6A is an IMU footprint that is not fitted. Whether a register-pointer
+write starts charger host mode (130 to 160 s watchdog) is unknown until the TI data sheet and an
+EVM run settle it, so the scan must not touch those addresses at all.
+
+The skip is compiled only with -D NDI_I2C_SKIP_CHARGER_IMU, which the ndi_1w env sets.
+No macro in stock Meshtastic filters scanner addresses (upstream read pass, SOURCES.md).
+
+--- a/src/detect/ScanI2CTwoWire.cpp
++++ b/src/detect/ScanI2CTwoWire.cpp
+@@ -275,6 +275,12 @@
+     // 0x7C-0x7F Reserved for future purposes
+ 
+     for (addr.address = 8; addr.address < 120; addr.address++) {
++#ifdef NDI_I2C_SKIP_CHARGER_IMU
++        // NDI 1 W: never probe 0x6A (IMU footprint) or 0x6B (BQ25856-Q1 charger). The scan would send
++        // register-pointer writes there at every boot (ndi_1w/docs/SAFETY.md, patch 0001).
++        if (addr.address == 0x6A || addr.address == 0x6B)
++            continue;
++#endif
+         if (asize != 0) {
+             if (!in_array(address, asize, (uint8_t)addr.address))
+                 continue;

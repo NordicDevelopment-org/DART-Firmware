@@ -1,0 +1,4 @@
+* text=auto eol=lf
+# The netlist is hashed (ndi_1w/hardware/PROVENANCE.md): never rewrite its line endings.
+ndi_1w/hardware/*.net -text
+ndi_1w/meshtastic/patches/*.patch -text

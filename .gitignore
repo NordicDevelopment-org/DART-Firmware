@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+_upstream/
+_out/
+ndi_1w/core/build/
+ndi_1w/core/*.o
+ndi_1w/core/tests/*.o
+.pio/

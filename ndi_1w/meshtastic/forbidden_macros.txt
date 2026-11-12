@@ -1,0 +1,30 @@
+# Macros that must never be DEFINED in the NDI 1 W overlay (variant files, platformio.ini build flags)
+# or in the generated header. Each one makes stock Meshtastic drive an NDI net or report the wrong
+# hardware. Checked by ndi_1w/ci/check_forbidden.py and by #error guards in ndi_config.h.
+# Format: NAME  # reason (source: ndi_1w/docs/SOURCES.md, notes from the upstream read pass)
+
+RAK4630               # reports hardware model RAK4631 (9) instead of PRIVATE_HW (255)
+RAK_4631              # selects RAK code paths
+RAK3401               # reports hardware model RAK3401
+RAK13302              # selects the RAK 1 W gain table, which is not NDI's chain
+HAS_ETHERNET          # RAK4631 default: pulses COLD_STAT P0.21 and reads FG_ALRT P0.26
+PIN_BUZZER            # stock tone() on COLD_STAT P0.21 (heater read-back)
+AQ_SET_PIN            # stock drives FEM_FPWM P0.10 high at boot and low in deep sleep
+PMSA003I_ENABLE_PIN   # same pin as AQ_SET_PIN
+DETECTION_SENSOR_EN   # stock drives BT_TEMP P0.04 (battery temperature tap) as an output
+PIN_3V3_EN            # stock drives GNSS_EN P1.02 high at boot
+LED_BLUE              # RAK maps this to P1.04, which is the RED die on NDI
+LED_NOTIFICATION      # which die is the notification LED is a pending decision
+PIN_BUTTON2           # stock would create a BackButton on P0.12; role of button 2 is undecided
+HAS_PPM               # compiles stock charger-writing code for 0x6B (BQ25896 PPM)
+HAS_PMU               # PMU init code paths
+HAS_NCP5623           # RAK RGB driver on the I2C bus
+RV3028_RTC            # RAK RTC probe on the I2C bus
+AREF_VOLTAGE          # RAK sets 3.0 V, which clips the VS_USB tap above 23 V
+VBAT_AR_INTERNAL      # same reason (AR_INTERNAL_3_0)
+SX126X_MAX_POWER      # set only through NDI_TX_MAX_SETTING_DBM in ndi_config.h
+TX_GAIN_LORA          # no gain table until the amplifier chain is measured
+NUM_PA_POINTS         # no gain table until the amplifier chain is measured
+HAS_LORA_FEM          # Heltec-style FEM driver: not this amplifier
+BATTERY_LPCOMP_INPUT  # LPCOMP wake is a shutdown-design decision (M2), not inherited from RAK
+BATTERY_LPCOMP_THRESHOLD

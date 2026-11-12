@@ -1,0 +1,92 @@
+name: ndi-1w variant build
+
+# Builds upstream Meshtastic at a pinned release tag, with and without the NDI 1 W overlay:
+#   ndi_1w  = overlay + patches (the product)
+#   rak4631 = upstream untouched (the control: proves this harness before the ndi_1w result is trusted)
+# Cannot be run by hand off-box: the PlatformIO registry and GitHub archives are only reachable here.
+
+on:
+  push:
+    branches: ['**']
+    paths:
+      - 'ndi_1w/**'
+      - '.github/workflows/ndi-1w-variant-build.yml'
+  pull_request:
+    paths:
+      - 'ndi_1w/**'
+  workflow_dispatch:
+    inputs:
+      upstream_tag:
+        description: 'Meshtastic release tag (blank: ndi_1w/upstream.lock, or latest stable if the lock says LATEST_STABLE)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ndi-1w-variant-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.r.outputs.tag }}
+      commit: ${{ steps.r.outputs.commit }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: r
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_TAG: ${{ inputs.upstream_tag }}
+        run: bash ndi_1w/ci/resolve_upstream.sh
+      - name: Record the resolved upstream
+        env:
+          TAG: ${{ steps.r.outputs.tag }}
+          COMMIT: ${{ steps.r.outputs.commit }}
+        run: |
+          {
+            echo "### Upstream Meshtastic"
+            echo
+            echo "- tag: \`${TAG}\`"
+            echo "- commit: \`${COMMIT}\`"
+            echo
+            echo "Copy both into ndi_1w/upstream.lock to pin them."
+          } >> "$GITHUB_STEP_SUMMARY"
+          printf 'UPSTREAM_TAG=%s\nUPSTREAM_COMMIT=%s\n' "$TAG" "$COMMIT" > upstream-resolved.env
+      - uses: actions/upload-artifact@v4
+        with:
+          name: upstream-resolved
+          path: upstream-resolved.env
+
+  build:
+    needs: resolve
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        env: [ndi_1w, rak4631]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: pio-${{ needs.resolve.outputs.commit }}-${{ matrix.env }}-v1
+          restore-keys: |
+            pio-${{ needs.resolve.outputs.commit }}-
+      - name: Build
+        env:
+          UPSTREAM_TAG: ${{ needs.resolve.outputs.tag }}
+          UPSTREAM_COMMIT: ${{ needs.resolve.outputs.commit }}
+        run: bash ndi_1w/ci/build_variant.sh "${{ matrix.env }}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: firmware-${{ matrix.env }}
+          path: _out/
+          if-no-files-found: warn

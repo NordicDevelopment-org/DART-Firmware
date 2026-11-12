@@ -1,0 +1,44 @@
+name: ndi-1w host tests
+
+# Everything that can be proven without the Meshtastic toolchain: the pin table against the netlist, the
+# generated variant files against the pin table, the overlay against the forbidden-macro list, and the
+# host-tested core logic (plain C++, no hardware calls).
+
+on:
+  push:
+    branches: ['**']
+    paths:
+      - 'ndi_1w/**'
+      - '.github/workflows/ndi-1w-host-tests.yml'
+  pull_request:
+    paths:
+      - 'ndi_1w/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  host:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Pin table matches the netlist
+        run: python3 -I ndi_1w/pin_table/check_netlist.py
+      - name: Generated variant files are up to date
+        run: python3 -I ndi_1w/pin_table/gen_variant.py --check
+      - name: Pin table tools unit tests
+        run: python3 -I -m unittest discover -s ndi_1w/pin_table/tests -v
+      - name: Overlay has no forbidden macro and carries the required flags
+        run: python3 -I ndi_1w/ci/check_forbidden.py
+      - name: CI shell scripts (shellcheck)
+        run: shellcheck ndi_1w/ci/*.sh
+      - name: Core host tests (g++), sanitizers, ADC ratios against the netlist
+        if: ${{ hashFiles('ndi_1w/core/Makefile') != '' }}
+        run: |
+          make -C ndi_1w/core test
+          make -C ndi_1w/core asan
+          make -C ndi_1w/core check-ratios
