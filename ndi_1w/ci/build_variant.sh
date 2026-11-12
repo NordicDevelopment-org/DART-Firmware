@@ -106,22 +106,43 @@ if [ -z "$(find "$out" -maxdepth 1 -name 'firmware-*.hex' -print -quit)" ]; then
 fi
 
 if [ "$env_name" = "ndi_1w" ]; then
-    echo "::group::symbol audit (informational for now)"
+    echo "::group::linked-image audit (fails the build)"
     nm_tool="$(find "$HOME/.platformio/packages" -name 'arm-none-eabi-nm' -type f 2> /dev/null | head -1)"
     elf="$(find "$build_dir" -maxdepth 1 -name 'firmware-*.elf' -print -quit)"
-    if [ -n "$nm_tool" ] && [ -n "$elf" ]; then
-        "$nm_tool" -C "$elf" > "$out/symbols-${env_name}.txt"
-        for pat in 'LSM6DS' 'AccelerometerThread' 'BQ25896' 'XPowers' 'RAK13302'; do
-            n="$(grep -c -i "$pat" "$out/symbols-${env_name}.txt" || true)"
-            echo "symbols matching ${pat}: ${n}"
-            if [ "${n:-0}" != "0" ]; then
-                echo "::warning::${n} symbols match ${pat} in the ndi_1w ELF (review: should be 0)"
-            fi
-        done
-    else
-        echo "::warning::arm-none-eabi-nm or the ELF was not found; symbol audit skipped"
+    if [ -z "$nm_tool" ] || [ -z "$elf" ]; then
+        echo "::error::arm-none-eabi-nm or the ELF was not found; cannot audit the linked image"
+        exit 1
     fi
+    syms="$out/symbols-${env_name}.txt"
+    "$nm_tool" -C "$elf" > "$syms"
+    audit_fail=0
+    # Code that could write the charger (0x6B) or an IMU (0x6A) must not be in the image.
+    for pat in 'LSM6DS' 'AccelerometerThread' 'BQ25896' 'XPowers' 'RAK13302'; do
+        n="$(grep -c -i "$pat" "$syms" || true)"
+        echo "symbols matching ${pat}: ${n} (must be 0)"
+        if [ "${n:-0}" != "0" ]; then
+            echo "::error::${n} symbols match ${pat} in the ndi_1w image"
+            audit_fail=1
+        fi
+    done
+    # Our hooks must override upstream's weak stubs (T = strong definition, W = weak).
+    for hook in 'initVariant()' 'lateInitVariant()'; do
+        if grep -F -q " T ${hook}" "$syms" && ! grep -F -q " W ${hook}" "$syms"; then
+            echo "hook ${hook}: strong definition, weak stub overridden"
+        else
+            echo "::error::hook ${hook} is not the NDI definition (expected a strong T symbol and no weak W symbol)"
+            grep -F "${hook}" "$syms" || true
+            audit_fail=1
+        fi
+    done
+    # Informational: modules excluded or kept.
+    for pat in 'SerialModule::' 'RemoteHardwareModule' 'ExternalNotificationModule::' 'DetectionSensorModule::'; do
+        echo "info: symbols matching ${pat}: $(grep -c "$pat" "$syms" || true)"
+    done
     echo "::endgroup::"
+    if [ "$audit_fail" -ne 0 ]; then
+        exit 1
+    fi
 fi
 
 summary "### ${env_name}"
