@@ -1,18 +1,17 @@
 # Pins everything an NDI 1 W build depends on that a Meshtastic tag does NOT pin.
 # KEY=VALUE, no quoting, no spaces. Parsed by ndi_1w/ci/resolve_upstream.sh (never sourced).
 #
-# UPSTREAM_TAG=LATEST_STABLE means: CI asks GitHub for the latest non-prerelease release, records tag and
-# 40-hex commit in the job summary and in the 'upstream-resolved' artifact, and a human copies them here.
-# Once UPSTREAM_TAG and UPSTREAM_COMMIT are both set, CI builds exactly that and fails if the tag now points
-# somewhere else.
+# Pinned on 2026-11-12 from the latest non-prerelease release (CI run 43246719748, job resolve). CI builds exactly
+# this and fails if the tag now points somewhere else. To move: set UPSTREAM_TAG=LATEST_STABLE and clear
+# UPSTREAM_COMMIT, push, read the resolved tag and commit from the job summary, copy them here.
 UPSTREAM_REPO=https://github.com/meshtastic/firmware
-UPSTREAM_TAG=LATEST_STABLE
-UPSTREAM_COMMIT=
+UPSTREAM_TAG=v2.7.26.54e0d8d
+UPSTREAM_COMMIT=54e0d8d0ab2ff56b3a9ce967e53f79e49af560fb
 
 # Tool versions (PyPI latest on 2026-11-12; upstream CI installs both unpinned).
 PLATFORMIO_VERSION=6.2.0
 ADAFRUIT_NRFUTIL_VERSION=0.5.3.post16
 
 # Not pinned by a Meshtastic tag, resolved at build time from upstream's own ini files and recorded by CI
-# (see ndi_1w/docs/SOURCES.md): platform platformio/nordicnrf52@10.12.0, framework branch cpp17-platform of
-# meshtastic/Adafruit_nRF52_Arduino, toolchain-gccarmnoneeabi ~1.90301.0.
+# (see ndi_1w/docs/SOURCES.md): platform platformio/nordicnrf52@10.11.0 at this tag (10.12.0 on master), framework branch
+# cpp17-platform of meshtastic/Adafruit_nRF52_Arduino, toolchain-gccarmnoneeabi ~1.90301.0, RadioLib 7.6.0.

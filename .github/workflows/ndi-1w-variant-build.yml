@@ -55,7 +55,7 @@ jobs:
             echo "Copy both into ndi_1w/upstream.lock to pin them."
           } >> "$GITHUB_STEP_SUMMARY"
           printf 'UPSTREAM_TAG=%s\nUPSTREAM_COMMIT=%s\n' "$TAG" "$COMMIT" > upstream-resolved.env
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: upstream-resolved
           path: upstream-resolved.env
@@ -73,7 +73,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: ~/.platformio
           key: pio-${{ needs.resolve.outputs.commit }}-${{ matrix.env }}-v1
@@ -84,7 +84,7 @@ jobs:
           UPSTREAM_TAG: ${{ needs.resolve.outputs.tag }}
           UPSTREAM_COMMIT: ${{ needs.resolve.outputs.commit }}
         run: bash ndi_1w/ci/build_variant.sh "${{ matrix.env }}"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: firmware-${{ matrix.env }}
