@@ -7,18 +7,18 @@ Arduino number = 32 x port + pin. Boot = state `initVariant()` applies. Netlist:
 |---|---|---|---|---|---|---|---|
 | P0.00 | 0 | XL1 | unused | RESERVED | - | LFXO crystal XL1 | - |
 | P0.01 | 1 | XL2 | unused | RESERVED | - | LFXO crystal XL2 | - |
-| P0.02 | 2 | VS_USB | analog | ANALOG | NDI_PIN_VS_USB | USB leg voltage sense (analog) | USB leg presence (heater guard uses the same node in hardw |
+| P0.02 | 2 | VS_USB | analog | ANALOG | NDI_PIN_VS_USB | USB leg voltage sense (analog) | USB leg presence (heater guard uses the same node in hardware) |
 | P0.03 | 3 | QW_FLT | in | INPUT | NDI_PIN_QW_FLT | Qwiic port supply fault (digital in) | - |
 | P0.04 | 4 | BT_TEMP | analog | ANALOG | NDI_PIN_BT_TEMP | battery temperature (analog, via NTC node) | battery temperature reading (heater / charge decisions) |
 | P0.05 | 5 | VBAT_SENSE | analog | ANALOG | PIN_A0 (BATTERY_PIN) | VBAT sense (analog) | - |
 | P0.06 | 6 | HB_LED | out | OUTPUT_HIGH | NDI_PIN_LED_HB | heartbeat LED (green, low = on) | - |
-| P0.07 | 7 | HEAT_INH | out | OUTPUT_LOW | NDI_PIN_HEAT_VETO | heater veto (high = heater off) | HEATER veto (inhibit only; heating never depends on firmwa |
+| P0.07 | 7 | HEAT_INH | out | OUTPUT_LOW | NDI_PIN_HEAT_VETO | heater veto (high = heater off) | HEATER veto (inhibit only; heating never depends on firmware) |
 | P0.08 | 8 | LED_B | out | OUTPUT_HIGH | NDI_PIN_LED_B | status LED blue (low = on) | - |
 | P0.09 | 9 | BTN1_M | in | INPUT | PIN_BUTTON1 | user button (NFC1 ball) | - |
-| P0.10 | 10 | FEM_FPWM | out | INPUT | NDI_PIN_FEM_FPWM | amplifier supply mode (NFC2 ball; low = PFM) | amplifier supply mode (transmit chain ripple at the LNA /  |
+| P0.10 | 10 | FEM_FPWM | out | INPUT | NDI_PIN_FEM_FPWM | amplifier supply mode (NFC2 ball; low = PFM) | amplifier supply mode (transmit chain ripple at the LNA / PA) |
 | P0.11 | 11 | PD_STAT | in | INPUT | NDI_PIN_PD_STAT | USB-C PD plug event (TPS25730D) | - |
 | P0.12 | 12 | BTN2 | in | INPUT | NDI_PIN_BTN2 | button 2 / accessory (J14) | - |
-| P0.13 | 13 | I2C_SDA | bidir | PERIPHERAL | PIN_WIRE_SDA | I2C SDA | charger / fuel-gauge bus (BQ25856-Q1 reverse mode must nev |
+| P0.13 | 13 | I2C_SDA | bidir | PERIPHERAL | PIN_WIRE_SDA | I2C SDA | charger / fuel-gauge bus (BQ25856-Q1 reverse mode must never be... |
 | P0.14 | 14 | I2C_SCL | bidir | PERIPHERAL | PIN_WIRE_SCL | I2C SCL | charger / fuel-gauge bus |
 | P0.15 | 15 | GNSS_TXD | in | PERIPHERAL | PIN_SERIAL1_RX (GPS_RX_PIN) | GNSS UART RX (module TXD) | - |
 | P0.16 | 16 | GNSS_RXD_M | out | PERIPHERAL | PIN_SERIAL1_TX (GPS_TX_PIN) | GNSS UART TX (module RXD via Ioff buffer) | - |
@@ -30,10 +30,10 @@ Arduino number = 32 x port + pin. Boot = state `initVariant()` applies. Netlist:
 | P0.22 | 22 | SOS_OUT | in | INPUT | NDI_PIN_SOS_OUT | SOS latch output (J8 not fitted) | - |
 | P0.23 | 23 | SOS_CLR | out | INPUT | NDI_PIN_SOS_CLR | SOS latch clear | - |
 | P0.24 | 24 | CHG_INT | in | INPUT | NDI_PIN_CHG_INT | charger INT (256 us pulse) | charger interrupt |
-| P0.25 | 25 | ID_EN | out | OUTPUT_LOW | NDI_PIN_ID_EN | ID_EN: power VLOGIC on the pack alone | powers the ID / thermostat comparators on the pack alone ( |
+| P0.25 | 25 | ID_EN | out | OUTPUT_LOW | NDI_PIN_ID_EN | ID_EN: power VLOGIC on the pack alone | powers the ID / thermostat comparators on the pack alone (no... |
 | P0.26 | 26 | FG_ALRT | in | INPUT | NDI_PIN_FG_ALRT | fuel gauge ALRT | low-battery alert |
 | P0.27 | 27 | QW_EN_M | out | INPUT | NDI_PIN_QW_EN | Qwiic port enable (low = off) | - |
-| P0.28 | 28 | VS_AUX | analog | ANALOG | NDI_PIN_VS_AUX | pads leg voltage sense (analog) | pads leg presence (heater guard uses the same node in hard |
+| P0.28 | 28 | VS_AUX | analog | ANALOG | NDI_PIN_VS_AUX | pads leg voltage sense (analog) | pads leg presence (heater guard uses the same node in hardware) |
 | P0.29 | 29 | ANT_FLT_M | in | INPUT | NDI_PIN_ANT_FLT | GNSS antenna feed fault (digital in) | - |
 | P0.30 | 30 | SPARE_AIN6 | analog | ANALOG | NDI_PIN_VLOGIC_HALF | VLOGIC / 2 reference (analog) | reference for the battery-temperature reading |
 | P0.31 | 31 | CHEM_ID_ADC | analog | ANALOG | NDI_PIN_CHEM_ID | chemistry ID / 2 (analog) | chemistry ID (charger voltage band is set in hardware) |

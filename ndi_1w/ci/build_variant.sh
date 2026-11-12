@@ -71,9 +71,21 @@ fi
 cd "$work"
 version="$(python3 bin/buildinfo.py long)"
 export APP_VERSION="$version"
+# SCONSFLAGS=-k keeps compiling after the first error, so one run shows every problem.
+export SCONSFLAGS="${SCONSFLAGS:-} -k"
+build_log="$out/pio-build-${env_name}.log"
 echo "::group::pio run -e ${env_name} (version ${version})"
-pio run --environment "$env_name" -t mtjson
+set +e
+pio run --environment "$env_name" -t mtjson 2>&1 | tee "$build_log"
+rc="${PIPESTATUS[0]}"
+set -e
 echo "::endgroup::"
+if [ "$rc" -ne 0 ]; then
+    echo "::group::error digest for ${env_name} (pio exit ${rc})"
+    grep -n -E "error:|fatal error|undefined reference|multiple definition|\*\*\* \[" "$build_log" | head -80 || true
+    echo "::endgroup::"
+    exit "$rc"
+fi
 
 build_dir=".pio/build/${env_name}"
 cp "$build_dir"/firmware-* "$out"/ 2>/dev/null || true

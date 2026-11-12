@@ -87,6 +87,15 @@ extern "C" {
 #define NDI_PIN_RING_USER_B (41) // P1.09 RING_U_B: user ring LED B drive
 
 /*
+ * Serial: Serial1 is the GNSS (pins above). Serial2 has NO pins on this board. It is declared only because
+ * upstream SerialModule.cpp is compiled on every nRF52 target and names Serial2 (its own guard ignores
+ * MESHTASTIC_EXCLUDE_SERIAL). The module itself is excluded, so Serial2 is never started.
+ * Same placeholder pattern as upstream variants/nrf52840/seeed_wio_tracker_L1/variant.h.
+ */
+#define PIN_SERIAL2_RX (-1)
+#define PIN_SERIAL2_TX (-1)
+
+/*
  * Analog pins (Arduino core names). A0 is the battery tap (stock BATTERY_PIN); A1 to A5 follow the NDI taps.
  */
 #define PIN_A1 (NDI_PIN_VS_USB)

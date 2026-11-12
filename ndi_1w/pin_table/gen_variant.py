@@ -167,8 +167,17 @@ def validate(rows, forbidden):
     return errs
 
 
+def short(text, n):
+    """Cut at a word boundary and say so, so a table cell never ends mid-word."""
+    text = text.strip()
+    if len(text) <= n:
+        return text
+    cut = text[: n - 3].rsplit(" ", 1)[0]
+    return cut.rstrip(",;:( ") + "..."
+
+
 def role_text(r):
-    return ascii_clean(r["role"]).strip()[:64]
+    return short(ascii_clean(r["role"]), 64)
 
 
 def pin_macros_block(rows):
@@ -252,7 +261,7 @@ def render_md(rows):
         out.append("| {} | {} | {} | {} | {} | {} | {} | {} |".format(
             r["port_pin"].strip(), r["arduino_number"].strip(), ascii_clean(r["net"]).strip()[:22],
             r["direction"].strip(), r["init_mode"].strip(), mac, role_text(r).replace("|", "/"),
-            safety[:58].replace("|", "/")))
+            short(safety, 70).replace("|", "/")))
     return "\n".join(out) + "\n"
 
 
